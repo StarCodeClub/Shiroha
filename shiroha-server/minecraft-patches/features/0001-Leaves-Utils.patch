@@ -1,0 +1,114 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sat, 18 Oct 2025 21:59:13 +0800
+Subject: [PATCH] Leaves Utils
+
+A part of Leaves(https://github.com/LeavesMC/Leaves/blob/master/leaves-server/minecraft-patches/features/0002-Leaves-Server-Config-And-Command.patch)
+
+Original license: https://github.com/LeavesMC/Leaves/blob/master/LICENSE.md
+
+diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
+index 34d802060e096c5acfbd9a66fab96c0e8c792fe1..de0fc8213e57360c6541d6785492c090678467e0 100644
+--- a/net/minecraft/world/entity/Entity.java
++++ b/net/minecraft/world/entity/Entity.java
+@@ -373,6 +373,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     public long activatedImmunityTick = Integer.MIN_VALUE;
+     public int teleportTickType = 0;// Luminol - Entity portal-teleport speed fix
+ 
++    private net.minecraft.nbt.CompoundTag leavesData = new net.minecraft.nbt.CompoundTag(); // Leaves - Leaves ex data
++
+     public void inactiveTick() {
+     }
+     // Paper end - EAR 2
+@@ -2639,6 +2641,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+                 output.putBoolean("Paper.FreezeLock", true);
+             }
+             // Paper end
++            output.store("Leaves.Data", net.minecraft.nbt.CompoundTag.CODEC, leavesData); // Leaves - leaves ex data
+         } catch (Throwable var7) {
+             CrashReport crashReport = CrashReport.forThrowable(var7, "Saving entity NBT");
+             CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being saved");
+@@ -2759,6 +2762,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+             }
+             freezeLocked = input.getBooleanOr("Paper.FreezeLock", false);
+             // Paper end
++            leavesData = input.read("Leaves.Data", net.minecraft.nbt.CompoundTag.CODEC).orElse(new net.minecraft.nbt.CompoundTag());
+         } catch (Throwable var7) {
+             CrashReport crashReport = CrashReport.forThrowable(var7, "Loading entity NBT");
+             CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being loaded");
+@@ -5400,7 +5404,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         return SlotAccess.NULL;
+     }
+ 
+-    @Nullable
++    @org.jetbrains.annotations.NotNull // Leaves - notnull
+     public MinecraftServer getServer() {
+         return this.level().getServer();
+     }
+@@ -6480,4 +6484,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     // Paper end - Expose entity id counter
+ 
+     public boolean shouldTickHot() { return this.tickCount > 20 * 10 && this.isAlive(); } // KioCG
++    // Leaves start - leaves ex data
++    public net.minecraft.nbt.CompoundTag getLeavesData() {
++        return leavesData;
++    }
++    // Leaves end - leaves ex data
+ }
+diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
+index 3a46cb424c8ea26386ed013cfc13aba36852a402..5eced13b80f0a9324b0f3c9e84eef13f5ecb2bfe 100644
+--- a/net/minecraft/world/level/Level.java
++++ b/net/minecraft/world/level/Level.java
+@@ -984,7 +984,7 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl
+         return this.isClientSide;
+     }
+ 
+-    @Nullable
++    @org.jetbrains.annotations.NotNull // Leaves - notnull
+     @Override
+     public MinecraftServer getServer() {
+         return null;
+diff --git a/net/minecraft/world/level/LevelAccessor.java b/net/minecraft/world/level/LevelAccessor.java
+index f22146c86dd916c16f683fd5b0a8e1205d51ff3b..ebe0ff56ac15c377904868f1a4972415c1b2ef98 100644
+--- a/net/minecraft/world/level/LevelAccessor.java
++++ b/net/minecraft/world/level/LevelAccessor.java
+@@ -56,7 +56,7 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess, Sch
+ 
+     DifficultyInstance getCurrentDifficultyAt(BlockPos pos);
+ 
+-    @Nullable
++    @org.jetbrains.annotations.NotNull // Leaves - notnull
+     MinecraftServer getServer();
+ 
+     default Difficulty getDifficulty() {
+diff --git a/net/minecraft/world/level/block/Block.java b/net/minecraft/world/level/block/Block.java
+index 644b9fab1d6729bf3964ebee0d6e9c46f89b8c46..5f5222a6fa3824ce55ac1018a7ff1b6e0fbd3988 100644
+--- a/net/minecraft/world/level/block/Block.java
++++ b/net/minecraft/world/level/block/Block.java
+@@ -610,6 +610,13 @@ public class Block extends BlockBehaviour implements ItemLike {
+     }
+     // CraftBukkit end
+ 
++    // Leaves start - reset push reaction
++    @org.jetbrains.annotations.Nullable
++    public net.minecraft.world.level.material.PushReaction getResetPushReaction() {
++        return null;
++    }
++    // Leaves end - reset push reaction
++
+     record ShapePairKey(VoxelShape first, VoxelShape second) {
+         @Override
+         public boolean equals(Object other) {
+diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
+index e9749b66239d7562ecf22002bfbaa95df197050f..246c6beaf693a02c2be333a035f04aae3f1561a2 100644
+--- a/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -764,7 +764,7 @@ public abstract class BlockBehaviour implements FeatureElement, org.leavesmc.lea
+         }
+ 
+         public PushReaction getPistonPushReaction() {
+-            return !this.isDestroyable() ? PushReaction.BLOCK : this.pushReaction; // Paper - Protect Bedrock and End Portal/Frames from being destroyed
++            return !this.isDestroyable() ? PushReaction.BLOCK : this.getBlock().getResetPushReaction() == null ? this.pushReaction : this.getBlock().getResetPushReaction(); // Paper - Protect Bedrock and End Portal/Frames from being destroyed // Leaves - reset push reaction
+         }
+ 
+         public boolean isSolidRender() {

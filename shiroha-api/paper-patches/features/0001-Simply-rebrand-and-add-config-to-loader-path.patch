@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sat, 18 Oct 2025 23:04:04 +0800
+Subject: [PATCH] Simply rebrand and add config to loader path
+
+
+diff --git a/src/main/java/io/papermc/paper/ServerBuildInfo.java b/src/main/java/io/papermc/paper/ServerBuildInfo.java
+index db5e2f10278c20286779362cfdfadb2f42c724e0..9ff74da2a4e06fb7badfce6a6d3f5171cada99cb 100644
+--- a/src/main/java/io/papermc/paper/ServerBuildInfo.java
++++ b/src/main/java/io/papermc/paper/ServerBuildInfo.java
+@@ -28,6 +28,7 @@ public interface ServerBuildInfo {
+      * The brand id for Luminol.
+      */
+     Key BRAND_LUMINOL_ID = Key.key("luminolmc", "luminol");
++    Key BRAND_SHIROHA_ID = Key.key("eilsapmc", "shiroha"); // Shiroha - Rebrand
+     // Luminol end
+ 
+     /**

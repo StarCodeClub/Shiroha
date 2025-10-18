@@ -11,6 +11,7 @@ the best one, which is totally immoral thing.
 
 And you could also see what are hanging on their documents:
 
+snapshot: https://web.archive.org/web/20251018101611/https://docs.canvasmc.io/
 <img src="resources/pic1.png" alt="pic1", width="300">
 
 So this project also as uhm... but to be honest I cannot say it is a protest against Canvas, but I still need to implement the things I love to do because that would be my

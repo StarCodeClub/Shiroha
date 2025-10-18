@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sat, 18 Oct 2025 18:57:15 +0800
+Subject: [PATCH] Simply rebrand and add config to loader path
+
+
+diff --git a/src/main/java/me/earthme/luminol/config/ConfigManager.java b/src/main/java/me/earthme/luminol/config/ConfigManager.java
+index d8066afd5f3f2ea9a5dff87d853562e22268785c..8b6ade77a601e11675102006f01a98ce534144b4 100644
+--- a/src/main/java/me/earthme/luminol/config/ConfigManager.java
++++ b/src/main/java/me/earthme/luminol/config/ConfigManager.java
+@@ -21,6 +21,7 @@ public class ConfigManager {
+ 
+     public static void initConfigs() {
+         configfiles.put("luminol", ConfigsInstance.of("luminol", "me.earthme.luminol.config.modules"));
++        configfiles.put("shiroha", ConfigsInstance.of("shiroha", "i.moniasuki.shiroha.config.modules")); // Shiroha - Add configs
+         preLoad();
+     }
+ 
+diff --git a/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java b/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java
+index df5d926fb4401dd93d658fe14ae4d9d58cff68f9..74c35a6604e59234142ed8ad2cff50df979f2148 100644
+--- a/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java
++++ b/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java
+@@ -8,7 +8,7 @@ import me.earthme.luminol.enums.EnumConfigCategory;
+ @ConfigClassInfo(category = EnumConfigCategory.MISC, name = "server_mod_name")
+ public class ServerModNameConfig implements IConfigModule {
+     @ConfigInfo(name = "name")
+-    public static String serverModName = "Luminol";
++    public static String serverModName = "Shiroha";
+ 
+     @ConfigInfo(name = "vanilla_spoof")
+     public static boolean fakeVanilla = false;

@@ -1,0 +1,66 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sat, 18 Oct 2025 18:57:50 +0800
+Subject: [PATCH] Simply rebrand and add config to loader path
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/Metrics.java b/src/main/java/com/destroystokyo/paper/Metrics.java
+index 22c038e6556d9911e1eaedf71d7b86843af89c16..8363ae5d28a699d204315dbed2e969f46eab9f09 100644
+--- a/src/main/java/com/destroystokyo/paper/Metrics.java
++++ b/src/main/java/com/destroystokyo/paper/Metrics.java
+@@ -593,7 +593,7 @@ public class Metrics {
+             boolean logFailedRequests = config.getBoolean("logFailedRequests", false);
+             // Only start Metrics, if it's enabled in the config
+             if (config.getBoolean("enabled", true)) {
+-                Metrics metrics = new Metrics("Luminol", serverUUID, logFailedRequests, Bukkit.getLogger()); // Folia - we have our own bstats page // Luminol
++                Metrics metrics = new Metrics("Shiroha", serverUUID, logFailedRequests, Bukkit.getLogger()); // Folia - we have our own bstats page // Luminol // Shiroha - Rebrand
+ 
+                 metrics.addCustomChart(new Metrics.SimplePie("minecraft_version", () -> {
+                     String minecraftVersion = Bukkit.getVersion();
+@@ -607,11 +607,11 @@ public class Metrics {
+                 final String implVersion = org.bukkit.craftbukkit.Main.class.getPackage().getImplementationVersion();
+                 if (implVersion != null) {
+                     final String buildOrHash = implVersion.substring(implVersion.lastIndexOf('-') + 1);
+-                    paperVersion = "git-Luminol-%s-%s".formatted(Bukkit.getServer().getMinecraftVersion(), buildOrHash); // Folia - we have our own bstats page // Luminol - Rebrand to Luminol
++                    paperVersion = "git-Shiroha-%s-%s".formatted(Bukkit.getServer().getMinecraftVersion(), buildOrHash); // Folia - we have our own bstats page // Luminol - Rebrand to Luminol // Shiroha - Rebrand
+                 } else {
+                     paperVersion = "unknown";
+                 }
+-                metrics.addCustomChart(new Metrics.SimplePie("luminol_version", () -> paperVersion)); // Folia - we have our own bstats page // Luminol
++                metrics.addCustomChart(new Metrics.SimplePie("shiroha_version", () -> paperVersion)); // Folia - we have our own bstats page // Luminol // Shiroha - Rebrand
+ 
+                 metrics.addCustomChart(new Metrics.DrilldownPie("java_version", () -> {
+                     Map<String, Map<String, Integer>> map = new HashMap<>();
+diff --git a/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java b/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
+index 4ada790812957657d580cb748077c4961987d0cb..ddd9ec2826e71848aadfc78e9f1bb204be7e34d9 100644
+--- a/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
++++ b/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
+@@ -32,6 +32,7 @@ public record ServerBuildInfoImpl(
+ 
+     private static final String BRAND_PAPER_NAME = "Paper";
+     private static final String BRAND_LUMINOL_NAME = "Luminol";
++    private static final String BRAND_SHIROHA_NAME = "Shiroha"; // Shiroha - Rebrand
+ 
+     private static final String BUILD_DEV = "DEV";
+ 
+@@ -43,9 +44,9 @@ public record ServerBuildInfoImpl(
+         this(
+             getManifestAttribute(manifest, ATTRIBUTE_BRAND_ID)
+                 .map(Key::key)
+-                .orElse(BRAND_LUMINOL_ID), // Folia // Luminol
++                .orElse(BRAND_SHIROHA_ID), // Folia // Luminol // Shiroha - Rebrand
+             getManifestAttribute(manifest, ATTRIBUTE_BRAND_NAME)
+-                .orElse(BRAND_LUMINOL_NAME), // Folia // Luminol
++                .orElse(BRAND_SHIROHA_NAME), // Folia // Luminol // Shiroha - Rebrand
+             SharedConstants.getCurrentVersion().id(),
+             SharedConstants.getCurrentVersion().name(),
+             getManifestAttribute(manifest, ATTRIBUTE_BUILD_NUMBER)
+@@ -62,7 +63,7 @@ public record ServerBuildInfoImpl(
+ 
+     @Override
+     public boolean isBrandCompatible(final @NotNull Key brandId) {
+-        return brandId.equals(this.brandId) || brandId.equals(BRAND_PAPER_ID) || brandId.equals(BRAND_FOLIA_ID); // Luminol
++        return brandId.equals(this.brandId) || brandId.equals(BRAND_PAPER_ID) || brandId.equals(BRAND_FOLIA_ID) || brandId.equals(BRAND_SHIROHA_ID); // Luminol // Shiroha - Rebrand
+     }
+ 
+     @Override

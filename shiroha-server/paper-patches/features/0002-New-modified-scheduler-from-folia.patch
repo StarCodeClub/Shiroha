@@ -8,9 +8,18 @@ Original patch: https://github.com/PaperMC/Folia/blob/80ab57dcbe5fa96cc2f7fe34ec
 Original project license: https://github.com/PaperMC/Folia/blob/80ab57dcbe5fa96cc2f7fe34ecba94162d8dd5e9/PATCHES-LICENSE
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 4dde33c872d463bf17ba03e926de90e6988444b2..33efcb7cfd2357713877471439b7703c4f5719c2 100644
+index 4dde33c872d463bf17ba03e926de90e6988444b2..e80e33d1f24402b946315392df96b4edcc2e2b01 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2961,7 +2961,7 @@ public final class CraftServer implements Server {
+     @Override
+     public double getAverageTickTime() {
+         // Folia start - region threading
+-        ca.spottedleaf.concurrentutil.scheduler.SchedulerThreadPool.SchedulableTick task = io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentTickingTask();
++        io.papermc.paper.threadedregions.ScheduledTaskThreadPool.SchedulableTick task = io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentTickingTask();
+         if (task == null) {
+             // might be on the shutdown thread, try retrieving the current region
+             if (io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentRegion() != null) {
 @@ -3034,7 +3034,7 @@ public final class CraftServer implements Server {
      @Override
      public double[] getTPS() {

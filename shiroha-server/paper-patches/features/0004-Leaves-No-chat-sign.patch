@@ -8,7 +8,7 @@ A part of Leaves(https://github.com/LeavesMC/Leaves/blob/master/leaves-server/pa
 Original license: https://github.com/LeavesMC/Leaves/blob/master/LICENSE.md
 
 diff --git a/src/main/java/io/papermc/paper/adventure/ChatProcessor.java b/src/main/java/io/papermc/paper/adventure/ChatProcessor.java
-index 388bad4fb53bb4046e7f616557e933339821a0a3..17d84822523f9ae5baaf7e9368dbd361586e864c 100644
+index 388bad4fb53bb4046e7f616557e933339821a0a3..84706759a555b56a66351b5fd828f195d179139e 100644
 --- a/src/main/java/io/papermc/paper/adventure/ChatProcessor.java
 +++ b/src/main/java/io/papermc/paper/adventure/ChatProcessor.java
 @@ -317,7 +317,7 @@ public final class ChatProcessor {
@@ -16,7 +16,7 @@ index 388bad4fb53bb4046e7f616557e933339821a0a3..17d84822523f9ae5baaf7e9368dbd361
          private void sendToServer(final ChatType.Bound chatType, final @Nullable Function<Audience, net.minecraft.network.chat.Component> msgFunction) {
              final PlayerChatMessage toConsoleMessage = msgFunction == null ? ChatProcessor.this.message : ChatProcessor.this.message.withUnsignedContent(msgFunction.apply(ChatProcessor.this.server.console));
 -            ChatProcessor.this.server.logChatMessage(toConsoleMessage.decoratedContent(), chatType, ChatProcessor.this.server.getPlayerList().verifyChatTrusted(toConsoleMessage) ? null : "Not Secure");
-+            ChatProcessor.this.server.logChatMessage(toConsoleMessage.decoratedContent(), chatType, ChatProcessor.this.server.getPlayerList().verifyChatTrusted(toConsoleMessage) || org.leavesmc.leaves.LeavesConfig.mics.noChatSign ? null : "Not Secure"); // Leaves - No Not Secure
++            ChatProcessor.this.server.logChatMessage(toConsoleMessage.decoratedContent(), chatType, ChatProcessor.this.server.getPlayerList().verifyChatTrusted(toConsoleMessage) || i.moniasuki.shiroha.config.functions.LeavesModifyConfig.noChatSign ? null : "Not Secure"); // Leaves - No Not Secure
          }
      }
  

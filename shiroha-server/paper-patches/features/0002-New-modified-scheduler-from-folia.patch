@@ -1,0 +1,74 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sun, 19 Oct 2025 09:32:33 +0800
+Subject: [PATCH] New modified scheduler from folia
+
+Original patch: https://github.com/PaperMC/Folia/blob/80ab57dcbe5fa96cc2f7fe34ecba94162d8dd5e9/folia-server/paper-patches/features/0008-fixup-Region-Threading-Base.patch & https://github.com/PaperMC/Folia/blob/80ab57dcbe5fa96cc2f7fe34ecba94162d8dd5e9/folia-server/minecraft-patches/features/0009-fixup-Region-Threading-Base.patch
+
+Original project license: https://github.com/PaperMC/Folia/blob/80ab57dcbe5fa96cc2f7fe34ecba94162d8dd5e9/PATCHES-LICENSE
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 4dde33c872d463bf17ba03e926de90e6988444b2..33efcb7cfd2357713877471439b7703c4f5719c2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -3034,7 +3034,7 @@ public final class CraftServer implements Server {
+     @Override
+     public double[] getTPS() {
+         // Folia start - region threading
+-        ca.spottedleaf.concurrentutil.scheduler.SchedulerThreadPool.SchedulableTick task = io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentTickingTask();
++        io.papermc.paper.threadedregions.ScheduledTaskThreadPool.SchedulableTick task = io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentTickingTask();
+         if (task == null) {
+             // might be on the shutdown thread, try retrieving the current region
+             if (io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentRegion() != null) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 7883b7973570b5f275a03c6aac4d3b4392e7fa6e..d537507422e16dfab3f1bdc277fa3babe5c7631e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -231,6 +231,47 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
+     private BorderChangeListener clientWorldBorderListener = this.createWorldBorderListener();
+     private long lastSaveTime; // Paper - getLastPlayed replacement API
+ 
++    // Folia start - region threading
++    private final ca.spottedleaf.concurrentutil.collection.MultiThreadedQueue<Runnable> packetQueue = new ca.spottedleaf.concurrentutil.collection.MultiThreadedQueue<>();
++    // used only to notify tasks for packets
++    private volatile io.papermc.paper.threadedregions.RegionizedWorldData lastRegion;
++
++    public void stopAcceptingPackets() {
++        this.packetQueue.preventAdds();
++    }
++
++    public void updateRegion(final io.papermc.paper.threadedregions.RegionizedWorldData region) {
++        this.lastRegion = region;
++        if (region != null && this.hasPackets()) {
++            region.regionData.setHasPackets();
++        }
++    }
++
++    public boolean hasPackets() {
++        return !this.packetQueue.isEmpty();
++    }
++
++    public boolean executeOnePacket() {
++        final Runnable run = this.packetQueue.poll();
++        if (run != null) {
++            run.run();
++            return true;
++        }
++        return false;
++    }
++
++    public void addPacket(final Runnable runnable) {
++        if (!this.packetQueue.add(runnable)) {
++            return;
++        }
++
++        final io.papermc.paper.threadedregions.RegionizedWorldData region = this.lastRegion;
++        if (region != null) {
++            region.regionData.setHasPackets();
++        }
++    }
++    // Folia end - region threading
++
+     public CraftPlayer(CraftServer server, ServerPlayer entity) {
+         super(server, entity);
+ 

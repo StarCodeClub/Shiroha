@@ -56,7 +56,7 @@ index 34d802060e096c5acfbd9a66fab96c0e8c792fe1..de0fc8213e57360c6541d6785492c090
 +    // Leaves end - leaves ex data
  }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 3a46cb424c8ea26386ed013cfc13aba36852a402..5eced13b80f0a9324b0f3c9e84eef13f5ecb2bfe 100644
+index d57b12fd6ab2d6f9bd02d58fcaeca8e774106d38..c334b4b6efeebd60c2e0149d8f069c2c2406ffe2 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -984,7 +984,7 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl

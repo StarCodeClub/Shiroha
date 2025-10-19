@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sun, 19 Oct 2025 08:47:46 +0800
+Subject: [PATCH] Leaves Configurable trading with the void
+
+A part of Leaves(https://github.com/LeavesMC/Leaves/blob/master/leaves-server/minecraft-patches/features/0005-Configurable-trading-with-the-void.patch)
+
+Original license: https://github.com/LeavesMC/Leaves/blob/master/LICENSE.md
+
+diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
+index eb3aef1f5198592eda5dafe84b91271e861b4135..e5d524e84ce80bb46a257267f73ea3b4b4480663 100644
+--- a/net/minecraft/server/level/ServerLevel.java
++++ b/net/minecraft/server/level/ServerLevel.java
+@@ -2900,7 +2900,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
+             // Spigot start
+             if (entity.getBukkitEntity() instanceof org.bukkit.inventory.InventoryHolder && (!(entity instanceof ServerPlayer) || entity.getRemovalReason() != Entity.RemovalReason.KILLED)) { // SPIGOT-6876: closeInventory clears death message
+                 // Paper start - Fix merchant inventory not closing on entity removal
+-                if (entity.getBukkitEntity() instanceof org.bukkit.inventory.Merchant merchant && merchant.getTrader() != null) {
++                if (!i.moniasuki.shiroha.config.vanilla.TradeWithVoidConfig.enabled && entity.getBukkitEntity() instanceof org.bukkit.inventory.Merchant merchant && merchant.getTrader() != null) { // Leaves - Configurable trading with the void
+                     merchant.getTrader().closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason.UNLOADED);
+                 }
+                 // Paper end - Fix merchant inventory not closing on entity removal
+diff --git a/net/minecraft/server/players/PlayerList.java b/net/minecraft/server/players/PlayerList.java
+index 073ff43279a399623ea0fda2c5c3930d51ae3b84..e96811d6fb16b89070634bb4358b2587b2d744d2 100644
+--- a/net/minecraft/server/players/PlayerList.java
++++ b/net/minecraft/server/players/PlayerList.java
+@@ -649,7 +649,7 @@ public abstract class PlayerList {
+                 player.stopRiding();
+                 rootVehicle.getPassengersAndSelf().forEach(entity -> {
+                     // Paper start - Fix villager boat exploit
+-                    if (entity instanceof net.minecraft.world.entity.npc.AbstractVillager villager) {
++                    if (!i.moniasuki.shiroha.config.vanilla.TradeWithVoidConfig.enabled && entity instanceof net.minecraft.world.entity.npc.AbstractVillager villager) { // Leaves - Configurable trading with the void
+                         final net.minecraft.world.entity.player.Player human = villager.getTradingPlayer();
+                         if (human != null) {
+                             villager.setTradingPlayer(null);
+diff --git a/net/minecraft/world/inventory/MerchantMenu.java b/net/minecraft/world/inventory/MerchantMenu.java
+index d59f67ffe34201c63e3d9706a4434f33b6732edb..2873aa917d2b99516bb63885f6a6aeeab202b8ff 100644
+--- a/net/minecraft/world/inventory/MerchantMenu.java
++++ b/net/minecraft/world/inventory/MerchantMenu.java
+@@ -74,6 +74,7 @@ public class MerchantMenu extends AbstractContainerMenu {
+ 
+     @Override
+     public boolean stillValid(Player player) {
++        if (i.moniasuki.shiroha.config.vanilla.TradeWithVoidConfig.enabled) return this.trader.getTradingPlayer() == player; // Leaves - Configurable trading with the void
+         if (!checkReachable) return true; // Paper - checkReachable
+         return this.trader.stillValid(player);
+     }

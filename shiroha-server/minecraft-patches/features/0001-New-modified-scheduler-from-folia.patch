@@ -79,7 +79,7 @@ index a1043c426d031755b57b77a9b2eec685e9861b13..5e66fcbee18ea0889ebe652228ac3e61
  
          if (region == null) {
 diff --git a/io/papermc/paper/threadedregions/RegionizedServer.java b/io/papermc/paper/threadedregions/RegionizedServer.java
-index e1842ab8f20271a8b20ab8462b09a4745a612a9a..2865ecfa743e52cf33f516883d92c5e177fdfbdc 100644
+index e1842ab8f20271a8b20ab8462b09a4745a612a9a..e376f15096518cf7a1c5adef7b6264924a7eed5b 100644
 --- a/io/papermc/paper/threadedregions/RegionizedServer.java
 +++ b/io/papermc/paper/threadedregions/RegionizedServer.java
 @@ -24,6 +24,7 @@ import org.slf4j.Logger;
@@ -90,16 +90,22 @@ index e1842ab8f20271a8b20ab8462b09a4745a612a9a..2865ecfa743e52cf33f516883d92c5e1
  import java.util.concurrent.CopyOnWriteArrayList;
  import java.util.concurrent.atomic.AtomicBoolean;
  import java.util.function.BooleanSupplier;
-@@ -65,7 +66,7 @@ public final class RegionizedServer {
+@@ -62,10 +63,12 @@ public final class RegionizedServer {
+         // call init event _before_ scheduling anything
+         new RegionizedServerInitEvent().callEvent();
+ 
++        // start scheduler threads
++        TickRegions.start(); // Shiroha - Start the new scheduler fist as its init sequence is much different from the old one
++
          // now we can schedule
-         this.tickHandle.setInitialStart(System.nanoTime() + TickRegionScheduler.TIME_BETWEEN_TICKS);
+-        this.tickHandle.setInitialStart(System.nanoTime() + TickRegionScheduler.TIME_BETWEEN_TICKS);
++        this.tickHandle.setInitialStart(System.nanoTime()); // Shiroha - Execute the first tick right now
          TickRegions.getScheduler().scheduleRegion(this.tickHandle);
 -        TickRegions.getScheduler().init();
-+        TickRegions.start();
      }
  
      public void invalidateStatus() {
-@@ -93,6 +94,15 @@ public final class RegionizedServer {
+@@ -93,6 +96,15 @@ public final class RegionizedServer {
          return;
      }
  
@@ -115,7 +121,7 @@ index e1842ab8f20271a8b20ab8462b09a4745a612a9a..2865ecfa743e52cf33f516883d92c5e1
      /**
       * Returns the current tick of the region ticking.
       * @throws IllegalStateException If there is no current region.
-@@ -131,7 +141,7 @@ public final class RegionizedServer {
+@@ -131,7 +143,7 @@ public final class RegionizedServer {
          private final AtomicBoolean ticking = new AtomicBoolean();
  
          public GlobalTickTickHandle(final RegionizedServer server) {
@@ -124,7 +130,7 @@ index e1842ab8f20271a8b20ab8462b09a4745a612a9a..2865ecfa743e52cf33f516883d92c5e1
              this.server = server;
          }
  
-@@ -171,26 +181,31 @@ public final class RegionizedServer {
+@@ -171,26 +183,31 @@ public final class RegionizedServer {
                  return false;
              }
  
@@ -319,7 +325,7 @@ index 3318df90f90b6fd831d0a96450e54ae426865ab1..9bb987af1b4b3457cbcede85959b04aa
              TickRegions.RegionStats.updateCurrentRegion();
          }
 diff --git a/io/papermc/paper/threadedregions/TickData.java b/io/papermc/paper/threadedregions/TickData.java
-index d4d80a69488f57704f1b3dc74cb379de36e80ec0..0383e4dcd611a7568597f46308060f3d7288a564 100644
+index d4d80a69488f57704f1b3dc74cb379de36e80ec0..9620db0140925f6a2e1fa09c2dccaaafe5358761 100644
 --- a/io/papermc/paper/threadedregions/TickData.java
 +++ b/io/papermc/paper/threadedregions/TickData.java
 @@ -20,6 +20,10 @@ public final class TickData {
@@ -333,6 +339,15 @@ index d4d80a69488f57704f1b3dc74cb379de36e80ec0..0383e4dcd611a7568597f46308060f3d
          final long start = time.tickStart();
  
          TickRegionScheduler.TickTime first;
+@@ -174,7 +178,7 @@ public final class TickData {
+             } else {
+                 long totalTickTime = 0L;
+                 long totalCpuTime = 0L;
+-                for (int k = 0, len2 = collapsedData.size(); k < len2; ++k) {
++                for (int k = 0, len2 = toCollapse.size(); k < len2; ++k) { // Shiroha - Fix old bug of folia's tick data(My old experience on luminol(x))
+                     final TickRegionScheduler.TickTime time = toCollapse.get(k);
+                     totalTickTime += time.tickLength();
+                     totalCpuTime += time.supportCPUTime() ? time.tickCpuTime() : 0L;
 diff --git a/io/papermc/paper/threadedregions/TickRegionScheduler.java b/io/papermc/paper/threadedregions/TickRegionScheduler.java
 index c485d5b3ba95f2a969bdf0dab9654ac284976f8d..d4798182e741ecc7b50d4ca1773bd0b2ab4f0710 100644
 --- a/io/papermc/paper/threadedregions/TickRegionScheduler.java

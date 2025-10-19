@@ -8,10 +8,10 @@ A part of Leaves(https://github.com/LeavesMC/Leaves/blob/master/leaves-server/mi
 Original license: https://github.com/LeavesMC/Leaves/blob/master/LICENSE.md
 
 diff --git a/io/papermc/paper/threadedregions/RegionizedServer.java b/io/papermc/paper/threadedregions/RegionizedServer.java
-index 2865ecfa743e52cf33f516883d92c5e177fdfbdc..a8977d05a0eddacbb352545a3c507adccb8ce307 100644
+index e376f15096518cf7a1c5adef7b6264924a7eed5b..a70441740228325f45e3a20693e4abd0fcec90de 100644
 --- a/io/papermc/paper/threadedregions/RegionizedServer.java
 +++ b/io/papermc/paper/threadedregions/RegionizedServer.java
-@@ -342,6 +342,8 @@ public final class RegionizedServer {
+@@ -344,6 +344,8 @@ public final class RegionizedServer {
  
          // player list
          MinecraftServer.getServer().getPlayerList().tick();

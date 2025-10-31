@@ -236,7 +236,7 @@ index 25a0b1d56652e4455a188d0f413581638d5ef538..9c03bd36f02566d4c2ba8e298458cadf
                      return true;
                  }
 diff --git a/io/papermc/paper/threadedregions/RegionizedWorldData.java b/io/papermc/paper/threadedregions/RegionizedWorldData.java
-index 3318df90f90b6fd831d0a96450e54ae426865ab1..9bb987af1b4b3457cbcede85959b04aa20aaed3b 100644
+index 96213569af94fc12b2384207861469c3e0208931..fd1fcede04ffdd5a3d8971789ebe7f6618dc57c2 100644
 --- a/io/papermc/paper/threadedregions/RegionizedWorldData.java
 +++ b/io/papermc/paper/threadedregions/RegionizedWorldData.java
 @@ -7,6 +7,7 @@ import ca.spottedleaf.moonrise.common.util.CoordinateUtils;
@@ -289,8 +289,8 @@ index 3318df90f90b6fd831d0a96450e54ae426865ab1..9bb987af1b4b3457cbcede85959b04aa
      private final NearbyPlayers nearbyPlayers;
      public final io.papermc.paper.threadedregions.EntityScheduler.EntitySchedulerTickList entitySchedulerTickList = new io.papermc.paper.threadedregions.EntityScheduler.EntitySchedulerTickList();
      private final ReferenceList<Entity> allEntities = new ReferenceList<>(EMPTY_ENTITY_ARRAY);
-@@ -549,7 +553,9 @@ public final class RegionizedWorldData {
-     public final Map<Long, ChunkSectionItemEntityMovementTracker> itemEntityMovementTrackerMap = new it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap<>();
+@@ -552,7 +556,9 @@ public final class RegionizedWorldData {
+     public boolean instantPOIUpdating = false;
      // Luminol end
  
 -    public RegionizedWorldData(final ServerLevel world) {
@@ -300,7 +300,7 @@ index 3318df90f90b6fd831d0a96450e54ae426865ab1..9bb987af1b4b3457cbcede85959b04aa
          this.world = world;
          this.blockLevelTicks = new LevelTicks<>(world::isPositionTickingWithEntitiesLoaded, world, true);
          this.fluidLevelTicks = new LevelTicks<>(world::isPositionTickingWithEntitiesLoaded, world, false);
-@@ -557,6 +563,7 @@ public final class RegionizedWorldData {
+@@ -560,6 +566,7 @@ public final class RegionizedWorldData {
          this.nearbyPlayers = new NearbyPlayers(world);
          this.wireHandler = new alternate.current.wire.WireHandler(world);
          this.turbo = new io.papermc.paper.redstone.RedstoneWireTurbo((RedStoneWireBlock)Blocks.REDSTONE_WIRE);
@@ -308,7 +308,7 @@ index 3318df90f90b6fd831d0a96450e54ae426865ab1..9bb987af1b4b3457cbcede85959b04aa
  
          // tasks may be drained before the region ticks, so we must set up the tick data early just in case
          this.updateTickData();
-@@ -714,6 +721,7 @@ public final class RegionizedWorldData {
+@@ -717,6 +724,7 @@ public final class RegionizedWorldData {
          if (this.allEntities.add(entity)) {
              if (entity instanceof ServerPlayer player) {
                  this.localPlayers.add(player);
@@ -316,7 +316,7 @@ index 3318df90f90b6fd831d0a96450e54ae426865ab1..9bb987af1b4b3457cbcede85959b04aa
              }
              TickRegions.RegionStats.updateCurrentRegion();
          }
-@@ -730,6 +738,7 @@ public final class RegionizedWorldData {
+@@ -733,6 +741,7 @@ public final class RegionizedWorldData {
          if (this.allEntities.remove(entity)) {
              if (entity instanceof ServerPlayer player) {
                  this.localPlayers.remove(player);

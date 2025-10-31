@@ -8,7 +8,7 @@ A part of Leaves(https://github.com/LeavesMC/Leaves/blob/master/leaves-server/mi
 Original license: https://github.com/LeavesMC/Leaves/blob/master/LICENSE.md
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 34d802060e096c5acfbd9a66fab96c0e8c792fe1..de0fc8213e57360c6541d6785492c090678467e0 100644
+index f5539ca5964abb18124522a8aa7ce940517b2011..64e8bef0f26c0662f4ca78215669bb072ca02f6d 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -373,6 +373,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
@@ -36,7 +36,7 @@ index 34d802060e096c5acfbd9a66fab96c0e8c792fe1..de0fc8213e57360c6541d6785492c090
          } catch (Throwable var7) {
              CrashReport crashReport = CrashReport.forThrowable(var7, "Loading entity NBT");
              CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being loaded");
-@@ -5400,7 +5404,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -5402,7 +5406,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
          return SlotAccess.NULL;
      }
  
@@ -45,7 +45,7 @@ index 34d802060e096c5acfbd9a66fab96c0e8c792fe1..de0fc8213e57360c6541d6785492c090
      public MinecraftServer getServer() {
          return this.level().getServer();
      }
-@@ -6480,4 +6484,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -6482,4 +6486,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
      // Paper end - Expose entity id counter
  
      public boolean shouldTickHot() { return this.tickCount > 20 * 10 && this.isAlive(); } // KioCG

@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Sat, 1 Nov 2025 12:50:27 +0800
+Subject: [PATCH] MC Technical Survival Mode
+
+A part of Leaves(https://github.com/LeavesMC/Leaves/blob/93311671d27c3541d6237be20c78d9ea665a995f/leaves-server/minecraft-patches/features/0033-MC-Technical-Survival-Mode.patch and https://github.com/LeavesMC/Leaves/blob/93311671d27c3541d6237be20c78d9ea665a995f/leaves-server/paper-patches/features/0007-MC-Technical-Survival-Mode.patch)
+
+Original license: https://github.com/LeavesMC/Leaves/blob/93311671d27c3541d6237be20c78d9ea665a995f/LICENSE.md
+
+diff --git a/src/main/java/io/papermc/paper/configuration/PaperConfigurations.java b/src/main/java/io/papermc/paper/configuration/PaperConfigurations.java
+index a972eeddbdc59e53279a7c5c704e28c2fcdf7290..4ee8bb1ec331f7486d8929c620516a51782146ef 100644
+--- a/src/main/java/io/papermc/paper/configuration/PaperConfigurations.java
++++ b/src/main/java/io/papermc/paper/configuration/PaperConfigurations.java
+@@ -336,6 +336,7 @@ public class PaperConfigurations extends Configurations<GlobalConfiguration, Wor
+             for (ServerLevel level : server.getAllLevels()) {
+                 this.createWorldConfig(createWorldContextMap(level), reloader(this.worldConfigClass, level.paperConfig()));
+             }
++            i.moniasuki.shiroha.config.vanilla.MCTechnicalSurvivalModeConfig.doMcTechnicalModeIf(); // Leaves - mc technical survival mode // Shiroha - Patched
+         } catch (Exception ex) {
+             throw new RuntimeException("Could not reload paper configuration files", ex);
+         }

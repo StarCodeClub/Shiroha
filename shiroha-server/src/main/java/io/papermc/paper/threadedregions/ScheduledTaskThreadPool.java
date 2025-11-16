@@ -2,6 +2,9 @@ package io.papermc.paper.threadedregions;
 
 import ca.spottedleaf.concurrentutil.util.ConcurrentUtil;
 import ca.spottedleaf.concurrentutil.util.TimeUtil;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.VarHandle;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,7 +51,7 @@ public final class ScheduledTaskThreadPool {
         }
     }
 
-    private static <K,V> K firstEntry(final ConcurrentSkipListMap<K, V> map) {
+    private static <K,V> @Nullable K firstEntry(final @NotNull ConcurrentSkipListMap<K, V> map) {
         final Map.Entry<K,V> first = map.firstEntry();
         return first == null ? null : first.getKey();
     }
@@ -62,7 +65,7 @@ public final class ScheduledTaskThreadPool {
         return first;
     }
 
-    private static ScheduledTickTask findFirstNonTakenNonWatched(final ConcurrentSkipListMap<ScheduledTickTask, ScheduledTickTask> map) {
+    private static @Nullable ScheduledTickTask findFirstNonTakenNonWatched(final @NotNull ConcurrentSkipListMap<ScheduledTickTask, ScheduledTickTask> map) {
         final Iterator<Map.Entry<ScheduledTickTask, ScheduledTickTask>> it = map.entrySet().iterator();
         while (it.hasNext()) {
             final ScheduledTickTask first = it.next().getKey();
@@ -78,7 +81,8 @@ public final class ScheduledTaskThreadPool {
         return null;
     }
 
-    private static Thread[] getThreads(final COWArrayList<TickThreadRunner> list) {
+    @Contract(pure = true)
+    private static Thread @NotNull [] getThreads(final @NotNull COWArrayList<TickThreadRunner> list) {
         final TickThreadRunner[] runners = list.getArray();
         final Thread[] ret = new Thread[runners.length];
 
@@ -92,14 +96,16 @@ public final class ScheduledTaskThreadPool {
     /**
      * Returns an array of the underlying scheduling threads.
      */
-    public Thread[] getCoreThreads() {
+    @Contract(pure = true)
+    public Thread @NotNull [] getCoreThreads() {
         return getThreads(this.coreThreads);
     }
 
     /**
      * Returns an array of the underlying scheduling threads which are alive.
      */
-    public Thread[] getAliveThreads() {
+    @Contract(pure = true)
+    public Thread @NotNull [] getAliveThreads() {
         return getThreads(this.aliveThreads);
     }
 
@@ -656,8 +662,10 @@ public final class ScheduledTaskThreadPool {
         }
     }
 
-    private static final class WaitState {
-
+    /**
+     * @param deadline the deadline of the task it's currently waiting for
+     */
+    private record WaitState(long id, long deadline, TickThreadRunner runner) {
         private static final Comparator<WaitState> OLDEST_FIRST = (final WaitState w1, final WaitState w2) -> {
             final long d1 = w1.deadline;
             final long d2 = w2.deadline;
@@ -676,16 +684,6 @@ public final class ScheduledTaskThreadPool {
 
             return Long.signum(w2.id - w1.id);
         };
-
-        private final long id;
-        private final long deadline; // set to DEADLINE_NOT_SET if idle
-        private final TickThreadRunner runner;
-
-        private WaitState(final long id, final long deadline, final TickThreadRunner runner) {
-            this.id = id;
-            this.deadline = deadline;
-            this.runner = runner;
-        }
     }
 
     private static final class TickThreadRunner implements Runnable {
@@ -823,7 +821,7 @@ public final class ScheduledTaskThreadPool {
             this.waitState = null;
         }
 
-        private ScheduledTickTask findTick() {
+        private @Nullable ScheduledTickTask findTick() {
             while (this.getStateVolatile() == STATE_WAITING) {
                 final ScheduledTickTask globalFirst = findFirstNonTakenNonWatched(this.scheduler.unwatchedScheduledTicks);
                 final ScheduledTickTask ourFirst = findFirstNonTaken(this.scheduledTicks);
@@ -913,7 +911,7 @@ public final class ScheduledTaskThreadPool {
             return false;
         }
 
-        private void reinsert(final ScheduledTickTask tick, final TickThreadRunner owner) {
+        private void reinsert(final @NotNull ScheduledTickTask tick, final TickThreadRunner owner) {
             final ScheduledTickTask newTask = tick.tick.task = new ScheduledTickTask(
                     tick.tick, tick.tick.getScheduledStart(), DEADLINE_NOT_SET, owner
             );
@@ -958,8 +956,8 @@ public final class ScheduledTaskThreadPool {
             this.compareAndExchangeStateVolatile(STATE_TASKS, STATE_WAITING);
         }
 
-        private ScheduledTickTask findTaskNotBehind(final ConcurrentSkipListMap<ScheduledTickTask, ScheduledTickTask> map,
-                                                    final long timeNow) {
+        private @Nullable ScheduledTickTask findTaskNotBehind(final @NotNull ConcurrentSkipListMap<ScheduledTickTask, ScheduledTickTask> map,
+                                                              final long timeNow) {
             for (final Iterator<ScheduledTickTask> iterator = map.keySet().iterator(); iterator.hasNext();) {
                 final ScheduledTickTask task = iterator.next();
                 if (task.isTaken()) {
@@ -981,7 +979,7 @@ public final class ScheduledTaskThreadPool {
             return null;
         }
 
-        private ScheduledTickTask waitForTick() {
+        private @Nullable ScheduledTickTask waitForTick() {
             final ScheduledTickTask tick = this.findTick();
 
             if (tick == null) {
@@ -1089,7 +1087,7 @@ public final class ScheduledTaskThreadPool {
             }
         }
 
-        private void doTick(final ScheduledTickTask tick) {
+        private void doTick(final @NotNull ScheduledTickTask tick) {
             if (tick.tick.tick()) {
                 this.reinsert(tick, this);
             }

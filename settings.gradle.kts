@@ -15,3 +15,4 @@ rootProject.name = "shiroha"
 
 include("shiroha-api")
 include("shiroha-server")
+include("FlowSched")

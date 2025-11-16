@@ -63,16 +63,19 @@ public final class ScheduledTaskThreadPool {
     }
 
     private static ScheduledTickTask findFirstNonTakenNonWatched(final ConcurrentSkipListMap<ScheduledTickTask, ScheduledTickTask> map) {
-        ScheduledTickTask first;
-        while ((first = firstEntry(map)) != null && (first.isTaken() || first.isWatched())) {
-            map.remove(first);
-            if (!first.isTaken() && !first.isWatched()) {
-                // handle race condition: unwatched after removal
-                map.put(first, first);
+        final Iterator<Map.Entry<ScheduledTickTask, ScheduledTickTask>> it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            final ScheduledTickTask first = it.next().getKey();
+
+            if (first.isTaken() || first.isWatched()) {
+                it.remove();
+                continue;
             }
+
+            return first;
         }
 
-        return first;
+        return null;
     }
 
     private static Thread[] getThreads(final COWArrayList<TickThreadRunner> list) {

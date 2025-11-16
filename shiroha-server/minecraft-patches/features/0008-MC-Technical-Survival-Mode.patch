@@ -94,10 +94,10 @@ index 91f7ee163107d846e7f6a5783be6eff96e783886..d223ef1925c98d8584c85d03889f3d2b
                  }
                  // Paper end - Fix bees aging inside; use exitTickCounter to keep actual bee life
 diff --git a/net/minecraft/world/level/block/entity/HopperBlockEntity.java b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
-index aca3303a043144894ae20ddc43abc55790db44ad..c18559390d22391b83478abfd32d1f316321c5b9 100644
+index 3fd172f82216fa35c36e5f563819a6f01ffd4ea4..3ce223536cdeb9cdb83295a361ddb0c96f9bc91c 100644
 --- a/net/minecraft/world/level/block/entity/HopperBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
-@@ -52,6 +52,7 @@ import org.leavesmc.leaves.lithium.common.tracking.entity.ChunkSectionEntityMove
+@@ -48,6 +48,7 @@ import org.leavesmc.leaves.lithium.common.tracking.entity.ChunkSectionEntityMove
  import org.leavesmc.leaves.lithium.common.tracking.entity.ChunkSectionInventoryEntityTracker;
  import org.leavesmc.leaves.lithium.common.tracking.entity.ChunkSectionItemEntityMovementTracker;
  // Leaves end - Lithium Sleeping Block Entity
@@ -105,7 +105,7 @@ index aca3303a043144894ae20ddc43abc55790db44ad..c18559390d22391b83478abfd32d1f31
  
  public class HopperBlockEntity extends RandomizableContainerBlockEntity implements Hopper, SleepingBlockEntity, ChunkSectionEntityMovementListener, LithiumInventory, InventoryChangeListener, UpdateReceiver, InventoryChangeTracker { // Leaves - Lithium Sleeping Block Entity
      public static final int MOVE_ITEM_SPEED = 8;
-@@ -304,7 +305,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -300,7 +301,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
                  origItemStack.setCount(originalItemCount);
              }
          }
@@ -114,7 +114,7 @@ index aca3303a043144894ae20ddc43abc55790db44ad..c18559390d22391b83478abfd32d1f31
              hopper.setCooldown(level.spigotConfig.hopperTransfer);
          }
          return false;
-@@ -346,7 +347,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -342,7 +343,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
          }
          origItemStack.setCount(originalItemCount);
  

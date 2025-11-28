@@ -8,10 +8,10 @@ A part of Leaves(https://github.com/LeavesMC/Leaves/blob/master/leaves-server/mi
 Original license: https://github.com/LeavesMC/Leaves/blob/master/LICENSE.md
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index ea177b8ad7ebb25e3e2967c8ff3d36dc3dda6a1d..dda76ddad7edace195e2698e4270b0837224df9b 100644
+index 38092dcc3dedc6c855e5598126be47f892223547..d71657456b3d42e89f76c37b8e15005ded942af9 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -372,6 +372,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -373,6 +373,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
      public long activatedImmunityTick = Integer.MIN_VALUE;
      public int teleportTickType = 0;// Luminol - Entity portal-teleport speed fix
  
@@ -20,7 +20,7 @@ index ea177b8ad7ebb25e3e2967c8ff3d36dc3dda6a1d..dda76ddad7edace195e2698e4270b083
      public void inactiveTick() {
      }
      // Paper end - EAR 2
-@@ -2638,6 +2640,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -2639,6 +2641,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
                  output.putBoolean("Paper.FreezeLock", true);
              }
              // Paper end
@@ -28,7 +28,7 @@ index ea177b8ad7ebb25e3e2967c8ff3d36dc3dda6a1d..dda76ddad7edace195e2698e4270b083
          } catch (Throwable var7) {
              CrashReport crashReport = CrashReport.forThrowable(var7, "Saving entity NBT");
              CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being saved");
-@@ -2758,6 +2761,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -2759,6 +2762,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
              }
              freezeLocked = input.getBooleanOr("Paper.FreezeLock", false);
              // Paper end
@@ -36,7 +36,7 @@ index ea177b8ad7ebb25e3e2967c8ff3d36dc3dda6a1d..dda76ddad7edace195e2698e4270b083
          } catch (Throwable var7) {
              CrashReport crashReport = CrashReport.forThrowable(var7, "Loading entity NBT");
              CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being loaded");
-@@ -5399,7 +5403,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -5400,7 +5404,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
          return SlotAccess.NULL;
      }
  
@@ -45,7 +45,7 @@ index ea177b8ad7ebb25e3e2967c8ff3d36dc3dda6a1d..dda76ddad7edace195e2698e4270b083
      public MinecraftServer getServer() {
          return this.level().getServer();
      }
-@@ -6462,4 +6466,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -6463,4 +6467,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
      // Paper end - Expose entity id counter
  
      public boolean shouldTickHot() { return this.tickCount > 20 * 10 && this.isAlive(); } // KioCG

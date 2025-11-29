@@ -1,4 +1,4 @@
-package i.moniasuki.shiroha.config.utils;
+package i.moniasuki.shiroha.utils;
 
 import ca.spottedleaf.concurrentutil.executor.PrioritisedExecutor;
 import ca.spottedleaf.concurrentutil.util.Priority;

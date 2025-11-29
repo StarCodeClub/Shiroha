@@ -64,3 +64,16 @@ index 4ada790812957657d580cb748077c4961987d0cb..ddd9ec2826e71848aadfc78e9f1bb204
      }
  
      @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+index 9699d7dcca5cf67f50ad05c0e875de424a4e00c5..d0cc30b6af7875618d58fe02759fbeb12f704598 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+@@ -11,7 +11,7 @@ public final class Versioning {
+     public static String getBukkitVersion() {
+         String result = "Unknown-Version";
+ 
+-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/me.earthme.luminol/luminol-api/pom.properties"); // Folia //Luminol
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/i.monikasuki.shiroha/shiroha-api/pom.properties"); // Folia //Luminol // Shiroha
+         Properties properties = new Properties();
+ 
+         if (stream != null) {

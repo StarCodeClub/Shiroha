@@ -5,10 +5,10 @@ Subject: [PATCH] Simply rebrand and add config to loader path
 
 
 diff --git a/src/main/java/me/earthme/luminol/config/ConfigManager.java b/src/main/java/me/earthme/luminol/config/ConfigManager.java
-index d8066afd5f3f2ea9a5dff87d853562e22268785c..9f8e604c89baf1a4960dd232de19df331c121c05 100644
+index 0bebc2cc87fb9c1c526e4de4f3bc157552307a72..80a40ca77800355849ea7adfabc3768fe10219c7 100644
 --- a/src/main/java/me/earthme/luminol/config/ConfigManager.java
 +++ b/src/main/java/me/earthme/luminol/config/ConfigManager.java
-@@ -21,6 +21,7 @@ public class ConfigManager {
+@@ -23,6 +23,7 @@ public class ConfigManager {
  
      public static void initConfigs() {
          configfiles.put("luminol", ConfigsInstance.of("luminol", "me.earthme.luminol.config.modules"));

@@ -11,10 +11,16 @@ public class FlowSchedRunnableTask2CCTask implements PrioritisedExecutor.Priorit
     private final AtomicBoolean queued = new AtomicBoolean(false);
     private final Runnable task;
     private final SchedulingManager worker;
+    private final Priority priority;
 
-    public FlowSchedRunnableTask2CCTask(Runnable task, SchedulingManager worker) {
+    public FlowSchedRunnableTask2CCTask(Runnable task, SchedulingManager worker, Priority priority) {
         this.task = task;
         this.worker = worker;
+        this.priority = priority;
+    }
+
+    public FlowSchedRunnableTask2CCTask(Runnable task, SchedulingManager worker) {
+        this(task, worker, null);
     }
 
     @Override
@@ -26,6 +32,11 @@ public class FlowSchedRunnableTask2CCTask implements PrioritisedExecutor.Priorit
     public boolean queue() {
         if (!this.queued.compareAndSet(false, true)) {
             return false;
+        }
+
+        if (this.priority != null) {
+            this.worker.getWorker().schedule(this.task, this.priority.priority);
+            return true;
         }
 
         this.worker.getWorker().schedule(this.task, ChunkLevel.MAX_LEVEL + 1);

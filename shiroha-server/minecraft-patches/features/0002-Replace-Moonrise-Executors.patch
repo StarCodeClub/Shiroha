@@ -1,0 +1,262 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Tue, 17 Feb 2026 19:55:21 +0800
+Subject: [PATCH] Replace Moonrise Executors
+
+
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/io/MoonriseRegionFileIO.java b/ca/spottedleaf/moonrise/patches/chunk_system/io/MoonriseRegionFileIO.java
+index e7fc56d6c5bbc82521f8c9866cd5c93b6c552129..ae9ad3ceebe3c796cb38d148106655ed144dc851 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/io/MoonriseRegionFileIO.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/io/MoonriseRegionFileIO.java
+@@ -1429,21 +1429,23 @@ public final class MoonriseRegionFileIO {
+         public final RegionFileType type;
+         private final PrioritisedExecutor compressionExecutor;
+         private final ConcurrentLong2ReferenceChainedHashTable<ChunkIOTask> chunkTasks = new ConcurrentLong2ReferenceChainedHashTable<>();
+-        private final AreaDependentQueue regionIoQueue;
++        private final com.ishland.c2me.base.common.scheduler.SchedulingManager regionIoQueue; // Shiroha - Replace Moonrise Executors
+ 
+         private final AtomicLong inProgressTasks = new AtomicLong();
+ 
+         public RegionDataController(final RegionFileType type, final PrioritisedExecutor ioExecutor,
+-                                    final PrioritisedExecutor compressionExecutor) {
++                                    final PrioritisedExecutor compressionExecutor, ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler scheduler) { // Shiroha - Replace Moonrise Executors
+             this.type = type;
+             this.compressionExecutor = compressionExecutor;
+-            this.regionIoQueue = new AreaDependentQueue(ioExecutor, 5); // same as regionfile shift
++            //this.regionIoQueue = new AreaDependentQueue(ioExecutor, 5); // same as regionfile shift // Shiroha - Replace Moonrise Executors
++            this.regionIoQueue = scheduler.ioExecutor; // Shiroha - Replace Moonrise Executors
+         }
+ 
+ 
+         public PrioritisedExecutor.PrioritisedTask createRegionIoTask(final int chunkX, final int chunkZ, final Runnable run,
+                                                                       final Priority priority) {
+-            return this.regionIoQueue.createTask(chunkX >> 5, chunkZ >> 5, 0, run, priority);
++            //return this.regionIoQueue.createTask(chunkX >> 5, chunkZ >> 5, 0, run, priority); // Shiroha - Replace Moonrise Executors
++            return this.regionIoQueue.createRadiusTask(run, chunkX >> 5, chunkZ >> 5, 0, priority); // Shiroha - Replace Moonrise Executors
+         }
+ 
+         final void startTask(final ChunkIOTask task) {
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/ChunkDataController.java b/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/ChunkDataController.java
+index 633e85bf7824fec10c81b2a64756a7ef756cd481..8a67ebd095dc3df0f3969d1ae75bc81bacb9ff2a 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/ChunkDataController.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/ChunkDataController.java
+@@ -16,7 +16,7 @@ public final class ChunkDataController extends MoonriseRegionFileIO.RegionDataCo
+     private final ServerLevel world;
+ 
+     public ChunkDataController(final ServerLevel world, final ChunkTaskScheduler taskScheduler) {
+-        super(MoonriseRegionFileIO.RegionFileType.CHUNK_DATA, taskScheduler.ioExecutor, taskScheduler.compressionExecutor);
++        super(MoonriseRegionFileIO.RegionFileType.CHUNK_DATA, taskScheduler.ioExecutor.asCUExecutor(), taskScheduler.compressionExecutor.asCUExecutor(), taskScheduler); // Shiroha - Replace Moonrise Executors
+         this.world = world;
+     }
+ 
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/EntityDataController.java b/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/EntityDataController.java
+index 992d19e1b08fa84325e7bb3c3d7d0b9dff4cdd3b..cec0328576e36daaad01c3de6a7ffca8581c8d11 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/EntityDataController.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/EntityDataController.java
+@@ -16,7 +16,7 @@ public final class EntityDataController extends MoonriseRegionFileIO.RegionDataC
+     private final EntityRegionFileStorage storage;
+ 
+     public EntityDataController(final EntityRegionFileStorage storage, final ChunkTaskScheduler taskScheduler) {
+-        super(MoonriseRegionFileIO.RegionFileType.ENTITY_DATA, taskScheduler.ioExecutor, taskScheduler.compressionExecutor);
++        super(MoonriseRegionFileIO.RegionFileType.ENTITY_DATA, taskScheduler.ioExecutor.asCUExecutor(), taskScheduler.compressionExecutor.asCUExecutor(), taskScheduler); // Shiroha - Replace Moonrise Executors
+         this.storage = storage;
+     }
+ 
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/PoiDataController.java b/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/PoiDataController.java
+index bd0d782852f9cfe5bc0b5339ecf4d82c10332ec9..4117692c1f5277d71f9029190a7fb3226ced218c 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/PoiDataController.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/io/datacontroller/PoiDataController.java
+@@ -14,7 +14,7 @@ public final class PoiDataController extends MoonriseRegionFileIO.RegionDataCont
+     private final ServerLevel world;
+ 
+     public PoiDataController(final ServerLevel world, final ChunkTaskScheduler taskScheduler) {
+-        super(MoonriseRegionFileIO.RegionFileType.POI_DATA, taskScheduler.ioExecutor, taskScheduler.compressionExecutor);
++        super(MoonriseRegionFileIO.RegionFileType.POI_DATA, taskScheduler.ioExecutor.asCUExecutor(), taskScheduler.compressionExecutor.asCUExecutor(), taskScheduler); // Shiroha - Replace Moonrise Executors
+         this.world = world;
+     }
+ 
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/ChunkTaskScheduler.java b/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/ChunkTaskScheduler.java
+index 5068de75f6f38c0459b77eb7354ce9db2d251d2c..a17253d3ce90f567acae37dd3bc7fe829938955a 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/ChunkTaskScheduler.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/ChunkTaskScheduler.java
+@@ -107,12 +107,32 @@ public final class ChunkTaskScheduler {
+     }
+ 
+     public final ServerLevel world;
+-    public final AreaDependentQueue radiusAwareScheduler;
+-    public final BalancedPrioritisedThreadPool.OrderedStreamGroup.Queue parallelGenExecutor;
+-    public final BalancedPrioritisedThreadPool.OrderedStreamGroup.Queue loadExecutor;
+-    public final BalancedPrioritisedThreadPool.OrderedStreamGroup.Queue ioExecutor;
+-    public final BalancedPrioritisedThreadPool.OrderedStreamGroup.Queue compressionExecutor;
+-    public final BalancedPrioritisedThreadPool.OrderedStreamGroup.Queue saveExecutor;
++    // public final AreaDependentQueue radiusAwareScheduler; // Shiroha - Moonrise Executors
++    public final com.ishland.c2me.base.common.scheduler.SchedulingManager parallelGenExecutor; // Shiroha - Replace Moonrise Executors
++    public final com.ishland.c2me.base.common.scheduler.SchedulingManager loadExecutor; // Shiroha - Replace Moonrise Executors
++    public final com.ishland.c2me.base.common.scheduler.SchedulingManager ioExecutor; // Shiroha - Replace Moonrise Executors
++    public final com.ishland.c2me.base.common.scheduler.SchedulingManager compressionExecutor; // Shiroha - Replace Moonrise Executors
++    public final com.ishland.c2me.base.common.scheduler.SchedulingManager saveExecutor; // Shiroha - Replace Moonrise Executors
++    // Shiroha start - Replace Moonrise Executors
++    private static final java.util.concurrent.atomic.AtomicInteger prioritizedSchedulerCounter = new java.util.concurrent.atomic.AtomicInteger();
++    private static final java.util.concurrent.atomic.AtomicBoolean shuttedDown = new java.util.concurrent.atomic.AtomicBoolean(false);
++    public static com.ishland.flowsched.executor.ExecutorManager prioritizedScheduler = null;
++    public static final com.ishland.c2me.base.common.scheduler.SingleThreadExecutor asyncScheduler;
++
++    static {
++        final com.ishland.c2me.base.common.scheduler.SingleThreadExecutor thread = new com.ishland.c2me.base.common.scheduler.SingleThreadExecutor();
++        thread.setDaemon(true);
++        thread.setName("c2me-sched");
++        thread.start();
++        asyncScheduler = thread;
++    }
++    public static void setThreads(int nThreads) {
++        prioritizedScheduler = new com.ishland.flowsched.executor.ExecutorManager(nThreads, thread -> {
++            thread.setDaemon(true);
++            thread.setName("c2me-worker-%d".formatted(prioritizedSchedulerCounter.getAndIncrement()));
++        });
++    }
++    // Shiroha end
+ 
+     // Folia - regionised ticking
+ 
+@@ -283,13 +303,13 @@ public final class ChunkTaskScheduler {
+         this.lockShift = Math.max(((ChunkSystemServerLevel)world).moonrise$getRegionChunkShift(), ThreadedTicketLevelPropagator.SECTION_SHIFT);
+         this.schedulingLockArea = new ReentrantAreaLock(this.getChunkSystemLockShift());
+ 
+-        this.parallelGenExecutor = MoonriseCommon.SERVER_GROUP.createExecutor();
+-        this.loadExecutor = MoonriseCommon.SERVER_GROUP.createExecutor();
+-        this.radiusAwareScheduler = new AreaDependentQueue(this.parallelGenExecutor, 4); // 4 -> 16x16 grid
+-        this.ioExecutor = MoonriseCommon.SERVER_IO_GROUP.createExecutor();
++        this.parallelGenExecutor = new com.ishland.c2me.base.common.scheduler.SchedulingManager(asyncScheduler, prioritizedScheduler); // Shiroha - Replace Moonrise Executors
++        this.loadExecutor = new com.ishland.c2me.base.common.scheduler.SchedulingManager(asyncScheduler, prioritizedScheduler); // Shiroha - Replace Moonrise Executors
++        // this.radiusAwareScheduler = new AreaDependentQueue(this.parallelGenExecutor, 4); // 4 -> 16x16 grid // Shiroha - Replace Moonrise Executors
++        this.ioExecutor = new com.ishland.c2me.base.common.scheduler.SchedulingManager(asyncScheduler, prioritizedScheduler); // Shiroha - Replace Moonrise Executors
+         // we need a separate executor here so that on shutdown we can continue to process I/O tasks
+-        this.compressionExecutor = MoonriseCommon.SERVER_GROUP.createExecutor();
+-        this.saveExecutor = MoonriseCommon.SERVER_GROUP.createExecutor();
++        this.compressionExecutor = new com.ishland.c2me.base.common.scheduler.SchedulingManager(asyncScheduler, prioritizedScheduler); // Shiroha - Replace Moonrise Executors
++        this.saveExecutor = new com.ishland.c2me.base.common.scheduler.SchedulingManager(asyncScheduler, prioritizedScheduler); // Shiroha - Replace Moonrise Executors
+         this.chunkHolderManager = new ChunkHolderManager(world, this);
+     }
+ 
+@@ -875,8 +895,7 @@ public final class ChunkTaskScheduler {
+     // Folia end - region threading
+ 
+     public boolean halt(final boolean sync, final long maxWaitNS) {
+-        this.parallelGenExecutor.halt();
+-        this.loadExecutor.halt();
++        /*prioritizedScheduler.shutdown(); // Shiroha - Replace Moonrise Executors
+         if (sync) {
+             final long time = System.nanoTime();
+             for (long failures = 9L;; failures = ConcurrentUtil.linearLongBackoff(failures, 500_000L, 50_000_000L)) {
+@@ -890,13 +909,18 @@ public final class ChunkTaskScheduler {
+                     return false;
+                 }
+             }
++        }*/ // Shiroha - Replace Moonrise Executors
++        // Shiroha start - Replace Moonrise Executors
++        if (shuttedDown.compareAndSet(false, true)) {
++            prioritizedScheduler.shutdown();
+         }
++        // Shiroha end
+ 
+         return true;
+     }
+ 
+     public boolean haltIO(final boolean sync, final long maxWaitNS) {
+-        this.ioExecutor.halt();
++        /*this.ioExecutor.halt(); // Shiroha - Replace Moonrise Executors
+         this.saveExecutor.halt();
+         this.compressionExecutor.halt();
+         if (sync) {
+@@ -913,7 +937,12 @@ public final class ChunkTaskScheduler {
+                     return false;
+                 }
+             }
++        }*/ // Shiroha - Replace Moonrise Executors
++        // Shiroha start - Replace Moonrise Executors
++        if (shuttedDown.compareAndSet(false, true)) {
++            prioritizedScheduler.shutdown();
+         }
++        // Shiroha end
+ 
+         return true;
+     }
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/task/ChunkUpgradeGenericStatusTask.java b/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/task/ChunkUpgradeGenericStatusTask.java
+index 78fd90e0aa4d84ab13de8c101c5d31596e9ba1f7..f273544320507852c2173edc6682fa8438d0a731 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/task/ChunkUpgradeGenericStatusTask.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/task/ChunkUpgradeGenericStatusTask.java
+@@ -45,13 +45,15 @@ public final class ChunkUpgradeGenericStatusTask extends ChunkProgressionTask im
+         this.toStatus = toStatus;
+         this.neighbours = neighbours;
+         if (((ChunkSystemChunkStatus)this.toStatus).moonrise$isParallelCapable()) {
+-            this.generateTask = this.scheduler.parallelGenExecutor.createTask(this, priority);
++            this.generateTask = scheduler.loadExecutor.createTask(this, priority); // Shiroha - Replace Moonrise Executors
++            //this.generateTask = this.scheduler.parallelGenExecutor.createTask(this, priority);  // Shiroha - Replace Moonrise Executors
+         } else {
+             final int writeRadius = ((ChunkSystemChunkStatus)this.toStatus).moonrise$getWriteRadius();
+             if (writeRadius < 0) {
+                 throw new IllegalStateException("Infinite write radius is not supported");
+             } else {
+-                this.generateTask = this.scheduler.radiusAwareScheduler.createTask(chunkX, chunkZ, writeRadius, this, priority);
++                this.generateTask = scheduler.parallelGenExecutor.createRadiusTask(this, chunkX ,chunkZ, writeRadius, priority); // Shiroha - Replace Moonrise Executors
++                // this.generateTask = this.scheduler.radiusAwareScheduler.createTask(chunkX, chunkZ, writeRadius, this, priority); // Shiroha - Replace Moonrise Executors
+             }
+         }
+     }
+diff --git a/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java b/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java
+index 7faf226b753a03e03b0dec9bbfcc94a6c3f5bc0f..664e19f130bca2c037eb92efb737fec4b74c36d5 100644
+--- a/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java
++++ b/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java
+@@ -891,10 +891,11 @@ public final class StarLightInterface {
+             public ServerChunkTasks(final long chunkCoordinate, final StarLightInterface lightEngine,
+                                     final ServerLightQueue queue, final Priority priority) {
+                 super(chunkCoordinate, lightEngine, queue);
+-                this.task = ((ChunkSystemServerLevel)(ServerLevel)lightEngine.getWorld()).moonrise$getChunkTaskScheduler().radiusAwareScheduler.createTask(
++                /*this.task = ((ChunkSystemServerLevel)(ServerLevel)lightEngine.getWorld()).moonrise$getChunkTaskScheduler().radiusAwareScheduler.createTask( // Shiroha - Replace Moonrise Executors
+                         CoordinateUtils.getChunkX(chunkCoordinate), CoordinateUtils.getChunkZ(chunkCoordinate),
+                         ((ChunkSystemChunkStatus)ChunkStatus.LIGHT).moonrise$getWriteRadius(), this, priority
+-                );
++                );*/ // Shiroha - Replace Moonrise Executors
++                this.task = ((ChunkSystemServerLevel) lightEngine.getWorld()).moonrise$getChunkTaskScheduler().parallelGenExecutor.createRadiusTask(this, CoordinateUtils.getChunkX(chunkCoordinate), CoordinateUtils.getChunkZ(chunkCoordinate), ChunkStatus.LIGHT.moonrise$getWriteRadius(), priority); // Shiroha - Replace Moonrise Executors
+             }
+ 
+             public boolean markTicketAdded() {
+diff --git a/net/minecraft/server/level/ThreadedLevelLightEngine.java b/net/minecraft/server/level/ThreadedLevelLightEngine.java
+index c33edee3c8a32507f01fc025135d57af0b41b10d..70aa3d3e0f1352479e86bb3beee84a6374954596 100644
+--- a/net/minecraft/server/level/ThreadedLevelLightEngine.java
++++ b/net/minecraft/server/level/ThreadedLevelLightEngine.java
+@@ -107,7 +107,24 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
+             }
+         }
+ 
+-        ((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel)world).moonrise$getChunkTaskScheduler().radiusAwareScheduler.queueTask(minX, minZ, maxX, maxZ, () -> {
++        // Shiroha start - Replace Moonrise Executors
++        double w = (double) maxX - minX;
++        double h = (double) maxZ - minZ;
++        int cx = Math.toIntExact(Math.round((minX + (double) maxX) * 0.5));
++        int cz = Math.toIntExact(Math.round((minZ + (double) maxZ) * 0.5));
++
++        double axisLen = Math.max(w, h);
++        double rotLen = (w + h) / Math.sqrt(2);
++
++        int radius;
++        if (axisLen <= rotLen) {
++            radius = Math.toIntExact(Math.round(axisLen / Math.sqrt(2)));
++        } else {
++            radius = Math.toIntExact(Math.round((w + h) * 0.5));
++        }
++        // Shiroha end
++       // ((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel)world).moonrise$getChunkTaskScheduler().radiusAwareScheduler.queueTask(minX, minZ, maxX, maxZ, () -> { // Shiroha - Replace Moonrise Executors
++        ((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel)world).moonrise$getChunkTaskScheduler().parallelGenExecutor.createRadiusTask(() ->{ // Shiroha - Replace Moonrise Executors
+             ThreadedLevelLightEngine.this.starlight$getLightEngine().relightChunks(
+                 chunks,
+                 (final ChunkPos pos) -> {
+@@ -156,7 +173,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
+                     }
+                 }
+             );
+-        });
++        }, cx, cz, radius).queue(); // Shiroha - Replace Moonrise Executors
+ 
+         return chunks.size();
+     }

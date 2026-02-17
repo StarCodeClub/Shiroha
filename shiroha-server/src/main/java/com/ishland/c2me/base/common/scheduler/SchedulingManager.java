@@ -1,8 +1,12 @@
 package com.ishland.c2me.base.common.scheduler;
 
+import ca.spottedleaf.concurrentutil.executor.PrioritisedExecutor;
+import ca.spottedleaf.concurrentutil.util.Priority;
 import com.ishland.flowsched.executor.ExecutorManager;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import moe.starcraft.shiroha.utils.FlowSchedRunnableTask2CUTask;
+import moe.starcraft.shiroha.utils.FlowSchedScheduledTask2CUTask;
 import net.minecraft.server.level.ChunkLevel;
 import net.minecraft.world.level.ChunkPos;
 
@@ -137,6 +141,23 @@ public class SchedulingManager {
         }
     }
 
+    public void updatePriority(ChunkPos pos, int priority) {
+        this.executor.execute(() -> this.updatePriorityInternal(pos.toLong(), priority));
+    }
+
+    private void updatePriorityInternal(long pos, int priority) {
+        final FreeableTaskList locks = this.pos2Tasks.get(pos);
+        if (locks != null) {
+            synchronized (locks) {
+                if (locks.freed) return;
+                for (AbstractPosAwarePrioritizedTask lock : locks) {
+                    lock.setPriority(priority);
+                    this.worker.notifyPriorityChange(lock);
+                }
+            }
+        }
+    }
+
     private void updatePriorityInternal(long pos) {
         final int priority = getPriority(pos);
         final FreeableTaskList locks = this.pos2Tasks.get(pos);
@@ -229,4 +250,88 @@ public class SchedulingManager {
 
     }
 
+    // Luminol - Moonrise extensions
+    public PrioritisedExecutor.PrioritisedTask createTask(Runnable runnable, Priority priority) {
+        return new FlowSchedRunnableTask2CUTask(runnable, this, priority);
+    }
+
+    public PrioritisedExecutor.PrioritisedTask createTask(Runnable runnable) {
+        return new FlowSchedRunnableTask2CUTask(runnable, this);
+    }
+
+    public PrioritisedExecutor.PrioritisedTask createRadiusTask(Runnable runnable, int x, int z, int radius) {
+        return new FlowSchedScheduledTask2CUTask(runnable, new ChunkPos(x, z), radius, this);
+    }
+
+    public PrioritisedExecutor.PrioritisedTask createRadiusTask(Runnable runnable, int x, int z, int radius, Priority priority) {
+        return new FlowSchedScheduledTask2CUTask(runnable, new ChunkPos(x, z), radius, this, priority);
+    }
+
+    public PrioritisedExecutor asCUExecutor() {
+        return new PrioritisedExecutor() {
+            @Override
+            public long getTotalTasksScheduled() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public long getTotalTasksExecuted() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public long generateNextSubOrder() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean executeTask() throws IllegalStateException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean shutdown() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isShutdown() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public PrioritisedTask queueTask(Runnable task) {
+                final PrioritisedTask created = SchedulingManager.this.createTask(task);
+                created.queue();
+                return created;
+            }
+
+            @Override
+            public PrioritisedTask queueTask(Runnable task, Priority priority) {
+                final PrioritisedTask created = SchedulingManager.this.createTask(task, priority);
+                created.queue();
+                return created;
+            }
+
+            @Override
+            public PrioritisedTask queueTask(Runnable task, Priority priority, long subOrder, long stream) {
+                return SchedulingManager.this.createTask(task, priority);
+            }
+
+            @Override
+            public PrioritisedTask createTask(Runnable task) {
+                return SchedulingManager.this.createTask(task);
+            }
+
+            @Override
+            public PrioritisedTask createTask(Runnable task, Priority priority) {
+                return SchedulingManager.this.createTask(task, priority);
+            }
+
+            @Override
+            public PrioritisedTask createTask(Runnable task, Priority priority, long subOrder, long stream) {
+                return SchedulingManager.this.createTask(task, priority);
+            }
+        };
+    }
 }

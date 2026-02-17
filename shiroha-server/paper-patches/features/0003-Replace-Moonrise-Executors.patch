@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mrhua269 <mrhua269@gmail.com>
+Date: Tue, 17 Feb 2026 20:22:47 +0800
+Subject: [PATCH] Replace Moonrise Executors
+
+
+diff --git a/src/main/java/ca/spottedleaf/moonrise/common/util/MoonriseCommon.java b/src/main/java/ca/spottedleaf/moonrise/common/util/MoonriseCommon.java
+index b7c7de9797d310b68228faf21164ecc701590a59..2bc8593cab5b628f51d267abb0f9674cc77a66a4 100644
+--- a/src/main/java/ca/spottedleaf/moonrise/common/util/MoonriseCommon.java
++++ b/src/main/java/ca/spottedleaf/moonrise/common/util/MoonriseCommon.java
+@@ -52,8 +52,9 @@ public final class MoonriseCommon {
+ 
+         final int ioThreads = Math.max(1, configIoThreads);
+ 
+-        WORKER_POOL.adjustThreadCount(workerThreads);
+-        IO_POOL.adjustThreadCount(ioThreads);
++        //WORKER_POOL.adjustThreadCount(workerThreads); // Shiroha - Replace Moonrise Executors
++        //IO_POOL.adjustThreadCount(ioThreads); // Shiroha - Replace Moonrise Executors
++        ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler.setThreads(workerThreads); // Shiroha - Replace Moonrise Executors
+ 
+         LOGGER.info(PlatformHooks.get().getBrand() + " is using " + workerThreads + " worker threads, " + ioThreads + " I/O threads");
+     }

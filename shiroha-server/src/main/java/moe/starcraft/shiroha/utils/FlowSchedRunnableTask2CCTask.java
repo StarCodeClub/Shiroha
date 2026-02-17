@@ -1,4 +1,4 @@
-package i.moniasuki.shiroha.utils;
+package moe.starcraft.shiroha.utils;
 
 import ca.spottedleaf.concurrentutil.executor.PrioritisedExecutor;
 import ca.spottedleaf.concurrentutil.util.Priority;
@@ -99,7 +99,22 @@ public class FlowSchedRunnableTask2CCTask implements PrioritisedExecutor.Priorit
     }
 
     @Override
-    public boolean setPriorityAndSubOrder(Priority priority, long subOrder) {
+    public long getStream() {
+        return 0;
+    }
+
+    @Override
+    public boolean setStream(long stream) {
         return false;
+    }
+
+    @Override
+    public boolean setPrioritySubOrderStream(Priority priority, long subOrder, long stream) {
+        return false;
+    }
+
+    @Override
+    public PrioritisedExecutor.PriorityState getPriorityState() {
+        return null;
     }
 }

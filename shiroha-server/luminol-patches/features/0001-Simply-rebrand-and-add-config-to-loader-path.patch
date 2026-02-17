@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: mrhua269 <mrhua269@gmail.com>
-Date: Sat, 18 Oct 2025 18:57:15 +0800
+Date: Tue, 17 Feb 2026 09:54:17 +0800
 Subject: [PATCH] Simply rebrand and add config to loader path
 
 
@@ -12,20 +12,20 @@ index 0bebc2cc87fb9c1c526e4de4f3bc157552307a72..80a40ca77800355849ea7adfabc3768f
  
      public static void initConfigs() {
          configfiles.put("luminol", ConfigsInstance.of("luminol", "me.earthme.luminol.config.modules"));
-+        configfiles.put("shiroha", ConfigsInstance.of("shiroha", "i.moniasuki.shiroha.config")); // Shiroha - Add configs
++        configfiles.put("shiroha", ConfigsInstance.of("shiroha", "moe.starcraft.shiroha.config")); // Shiroha - Add configs
          preLoad();
      }
  
 diff --git a/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java b/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java
-index df5d926fb4401dd93d658fe14ae4d9d58cff68f9..74c35a6604e59234142ed8ad2cff50df979f2148 100644
+index e4022494b050b68d54bac3cde87bdfc9e908859c..e0c554cbe6bb0ad6b3805d8a67f67c9398a8d158 100644
 --- a/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java
 +++ b/src/main/java/me/earthme/luminol/config/modules/misc/ServerModNameConfig.java
 @@ -8,7 +8,7 @@ import me.earthme.luminol.enums.EnumConfigCategory;
  @ConfigClassInfo(category = EnumConfigCategory.MISC, name = "server_mod_name")
  public class ServerModNameConfig implements IConfigModule {
-     @ConfigInfo(name = "name")
+     @ConfigInfo(name = "name", comments = "Decides the server mod name shown in your F3 debug screen.")
 -    public static String serverModName = "Luminol";
 +    public static String serverModName = "Shiroha";
  
-     @ConfigInfo(name = "vanilla_spoof")
+     @ConfigInfo(name = "vanilla_spoof", comments = "Ignore any plugin's modification and server mod name set in this config block, only force sending brand name of vanilla")
      public static boolean fakeVanilla = false;
